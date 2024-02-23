@@ -6,6 +6,7 @@ import { Command, InteractionHandler, AmplyfyClient } from './modules/types'
 import { CooldownHandler } from './modules/cooldowns'
 import { CooldownErrorEmbed, ErrorEmbed, RunTimeErrorEmbed } from './modules/embed'
 import { roleIds } from './modules/data'
+import { mongoClient } from './modules/mongo'
 
 dotenv.config()
 
@@ -145,7 +146,16 @@ client.once('ready', async (readyClient) => {
         }],
         status: 'online',
     })
-    console.log(chalk.bold(chalk.green('JHM Client is ready to go.\n\n')) + `${chalk.bold('Client ID')} : ${process.env.CLIENTID}\n${chalk.bold('Client Username')} : ${readyClient.user.username}`)
+    console.log(chalk.bold(chalk.green('Amplyfy Client is ready to go.\n\n')) + `${chalk.bold('Client ID')} : ${process.env.CLIENTID}\n${chalk.bold('Client Username')} : ${readyClient.user.username}`)
 })
 
-client.login(process.env.BOTTOKEN)
+const run = () => {
+    mongoClient.connect().then(()=>{
+        console.log(chalk.bold(chalk.blueBright('Established Connection With MongoDB')))
+    }).catch((e: Error)=>{
+        console.log(chalk.bold(chalk.redBright('Error while establishing connection with MongoDB\n\n' + e)))
+    })
+    client.login(process.env.BOTTOKEN)
+}
+
+run()

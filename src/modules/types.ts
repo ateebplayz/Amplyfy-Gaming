@@ -37,3 +37,35 @@ export interface AmplyfyClient extends discord.Client  {
     interactions: discord.Collection<string, InteractionHandler>,
     cooldowns: CooldownHandler,
 }
+
+export interface Product {
+    name: string,
+    description: string,
+    price: number,
+    stock: number,
+    values: Array<string>
+}
+
+export interface Purchase {
+    time: number,
+    product: Product
+}
+
+export interface BotUser {
+    userId: string,
+    balance: string,
+    clanId: string,
+    items: Array<Purchase>,
+}
+
+export interface ClanUser {
+    permissionLevel: number,
+    user: BotUser
+}
+
+export interface Clan {
+    clanId: string,
+    maxUser: number,
+    balance: number,
+    Users: Array<ClanUser>
+}
