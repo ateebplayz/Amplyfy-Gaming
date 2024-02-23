@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5",
+    "mongodb": "^6.3.0",
+    "typescript": "^5.3.3"
+  },
+  "name": "amplyfy-gaming",
+  "description": "\"# Amplyfy-Gaming\"",
+  "version": "1.0.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "start": "npx tsc && node out/deploy && node out/index"
+  },
+  "author": "",
+  "license": "ISC"
+}
