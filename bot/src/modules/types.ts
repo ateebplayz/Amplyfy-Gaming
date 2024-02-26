@@ -39,6 +39,7 @@ export interface AmplyfyClient extends discord.Client  {
 }
 
 export interface Product {
+    id: string,
     name: string,
     description: string,
     price: number,
@@ -48,12 +49,16 @@ export interface Product {
 
 export interface Purchase {
     time: number,
-    product: Product
+    product: Product,
+    value?: string,
 }
 
 export interface BotUser {
     userId: string,
-    balance: string,
+    balance: {
+        snowflakes: number,
+        iceCubes: number
+    },
     clanId: string,
     items: Array<Purchase>,
 }
@@ -65,6 +70,8 @@ export interface ClanUser {
 
 export interface Clan {
     clanId: string,
+    name: string,
+    description: string,
     maxUser: number,
     balance: number,
     Users: Array<ClanUser>

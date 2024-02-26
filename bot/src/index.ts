@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import { Command, InteractionHandler, AmplyfyClient } from './modules/types'
 import { CooldownHandler } from './modules/cooldowns'
 import { CooldownErrorEmbed, ErrorEmbed, RunTimeErrorEmbed } from './modules/embed'
-import { roleIds } from './modules/data'
+import { channelIds, roleIds } from './modules/data'
 import { mongoClient } from './modules/mongo'
 
 dotenv.config()
@@ -87,14 +87,14 @@ client.on('interactionCreate', async (interaction) => {
             console.log(`${chalk.red('EXECUTE ERROR >>')} Command ${command.data.name} ${Date.now() - timer}ms ${errorId}`)
             console.error(e)
 
-            await interaction.reply({ ephemeral: true, embeds: [new RunTimeErrorEmbed(errorId)] }).catch(console.log)
+            await interaction.editReply({embeds: [new RunTimeErrorEmbed(errorId)] }).catch(console.log)
         }
     } else if(interaction.isRepliable()) {
         const timer = Date.now()
         const localInteraction = client.interactions.get(interaction.customId)
 
         if (!localInteraction) {
-            if(interaction.customId == 'EXCLUDING CUSTOM IDS HERE') {
+            if(interaction.customId == 'button_shop_clan_purchase' || interaction.customId == 'modal_shop_clan_purchase') {
                 return console.log(`${chalk.green('EXECUTE >>')} Interaction ${interaction.customId} ${Date.now()-timer}ms | ${interaction.user.id}`)
             } else {
                 return console.log(`${chalk.red('NOT FOUND >> ')}Interaction ${interaction.customId}`)
@@ -138,7 +138,7 @@ client.once('ready', async (readyClient) => {
         console.log(`${chalk.green('LOADED >>')} Interaction\t${localInteraction.data.customId}`)
         client.interactions.set(localInteraction.data.customId, localInteraction);
     }
-    // channels.paidJob = await client.channels.cache.find(channel => channel.id === channelIds.paidJob)
+    channels.logChannel = await client.channels.cache.find(channel => channel.id === channelIds.logChannel)
     readyClient.user.setPresence({
         activities: [{
             name: 'Amplyfy Gaming',
