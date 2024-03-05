@@ -16,7 +16,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "npx tsc && node dist/index"
+    "start": "npx tsc && node dist/index",
+    "perm": "npx tsc && node dist/perm"
   },
   "author": "",
   "license": "ISC",

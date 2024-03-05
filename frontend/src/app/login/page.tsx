@@ -1,9 +1,17 @@
 'use client'
+import axios from 'axios'
 import '../globals.css'
 import React from 'react'
-
+import { useRouter } from 'next/navigation';
+function sleep(ms:number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 function LoginPage() {
+    const router = useRouter()
+
+    const [disabledBtn, setDisabledBtn] = React.useState(false)
     const [credentials, setCredentials] = React.useState({username: '', password: ''})
+    const [shake, setShake] = React.useState(false)
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>, type: 'username' | 'password') => {
         switch(type) {
             case 'username':
@@ -15,15 +23,29 @@ function LoginPage() {
         }
         console.log(credentials)
     }
+    const loginBtn = async () => {
+        setDisabledBtn(true)
+        const request = await axios.get(`http://localhost:8080/api/web/get?username=${credentials.username}&password=${credentials.password}`)
+        console.log(request.data)
+        if(request.data.code == 200) {
+            localStorage.setItem('token', request.data.token)
+            router.push('/')
+        } else {
+            setDisabledBtn(false)
+            setShake(true)
+            await sleep(500)
+            setShake(false)
+        }
+    }
   return (
-    <div className='flex justify-center items-center bg-gradient-to-r from-first via-second via-third via-fourth to-fifth min-h-screen'>
-        <div className='rounded-xl flex justify-center items-center flex-col glassy p-8 text-center '>
+    <div className='flex text-white justify-center items-center bg-gradient-to-r from-first via-second via-third via-fourth to-fifth min-h-screen'>
+        <div className={`rounded-xl flex justify-center items-center flex-col glassy p-8 text-center bg-[rgba(255, 255, 255, 0.34)] ${shake ? 'shake-element' : ''}`}>
             <h1 className='font-sans font-bold text-4xl'>Login</h1>
             <p className='font-sans text-lg mt-4'>Welcome Back! Access the Admin Dashboard</p>
             <div className='flex justify-center items-center w-full flex-col mt-8'>
                 <input onChange={(e) => {handleInput(e, 'username')}} className='glassy p-3 w-full rounded-xl border-white border-2 transition duration-500 hover:scale-105 active:scale-100 focus:cursor-text hover:cursor-pointer focus:outline-none text-black' placeholder='Username'/>
-                <input onChange={(e) => {handleInput(e, 'password')}} className='glassy p-3 w-full mt-4 rounded-xl border-white border-2 transition duration-500 hover:scale-105 active:scale-100 focus:cursor-text hover:cursor-pointer focus:outline-none text-black' placeholder='Password'/>
-                <button className='transition duration-500 bg-first p-3 w-full mt-4 rounded-xl hover:bg-second active:scale-90'>Submit</button>
+                <input onChange={(e) => {handleInput(e, 'password')}} className='glassy p-3 w-full mt-4 rounded-xl border-white border-2 transition duration-500 hover:scale-105 active:scale-100 focus:cursor-text hover:cursor-pointer focus:outline-none text-black' type='password' placeholder='Password'/>
+                <button onClick={loginBtn} className={`transition duration-500 bg-first p-3 w-full mt-4 rounded-xl hover:bg-second active:scale-90 ${disabledBtn ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''}`}>Submit</button>
             </div>
         </div>
     </div>
