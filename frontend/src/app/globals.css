@@ -18,6 +18,10 @@
   100% { transform: translateX(0); }
 }
 
+<<<<<<< HEAD
 .shake-element {
+=======
+.shake-animation {
+>>>>>>> 1c05eb3600e24680526510b34d3b5e5a39954dfa
   animation: shake 0.5s infinite;
 }

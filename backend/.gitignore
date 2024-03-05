@@ -1,5 +1,9 @@
 .env
 /node_modules
 package-lock.json
+<<<<<<< HEAD
 /dist
 ./dist
+=======
+/dist
+>>>>>>> 1c05eb3600e24680526510b34d3b5e5a39954dfa
