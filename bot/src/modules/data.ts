@@ -39,3 +39,4 @@ export const prices = {
 export const channelIds ={
     logChannel: '1211070510083870790'
 }
+export const guildId = '1186395097386983505'

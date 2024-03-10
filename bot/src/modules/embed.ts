@@ -37,6 +37,24 @@ export class InfoEmbed extends discord.EmbedBuilder {
     }
 }
 
+export class KeyEmbed extends discord.EmbedBuilder {
+    constructor() {
+        super()
+        this.setColor(AMPLYFY_LOGO_COLOR) // FFDE59 0599fc
+        this.setFooter(footer)
+    }
+}
+
+
+export class KeyMainEmbed extends discord.EmbedBuilder {
+    constructor(title: string, information: string) {
+        super()
+        this.setColor(AMPLYFY_LOGO_COLOR) // FFDE59 0599fc
+        this.setTitle(title)
+        this.setDescription(information || "An Error Occured!")
+    }
+}
+
 
 
 export class CooldownErrorEmbed extends ErrorEmbed {

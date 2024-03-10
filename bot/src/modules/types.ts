@@ -62,14 +62,19 @@ export interface BotUser {
     clanId: string,
     items: Array<Purchase>,
 }
+export interface Balance {
+    snowflakes: number,
+    iceCubes: number
+}
 
 export interface ClanUser {
     permissionLevel: number,
-    user: BotUser
+    user: string
 }
 
 export interface Clan {
     clanId: string,
+    leaderId: string,
     name: string,
     description: string,
     maxUser: number,

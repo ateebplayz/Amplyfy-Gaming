@@ -31,3 +31,25 @@ export function permissionCheck(type: 'clans' | 'users' | 'products' | 'admin', 
     }
     return permission
 }
+export function generateRandomString() {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    const digits = '1234567890'
+
+    function randomChar(charSet: string) {
+        return charSet.charAt(Math.floor(Math.random() * charSet.length))
+    }
+
+    let str = ''
+    for (let i = 0; i < 2; i++) {
+        str += randomChar(characters)
+    }
+    str += '-'
+    for (let i = 0; i < 3; i++) {
+        str += randomChar(characters + digits)
+    }
+    str += '-'
+    for (let i = 0; i < 3; i++) {
+        str += randomChar(digits)
+    }
+    return str
+}

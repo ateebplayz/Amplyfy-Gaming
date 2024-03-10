@@ -14,10 +14,15 @@ const config: Config = {
         third: '#f5725c',
         fourth: '#f5725c',
         fifth: '#dfa25e',
-        secondary: '#111111'
+        firstTrans: 'rgba(254, 22, 80, 0.75)',
+        secondTrans: 'rgba(249, 71, 86, 0.75)',
+        thirdTrans: 'rgba(245, 114, 92, 0.75)',
+        fourthTrans: 'rgba(245, 114, 92, 0.75)',
+        fifthTrans: 'rgba(223, 162, 94, 0.75)',
+        secondary: '#111111',
       }
     },
   },
-  plugins: [],
+  plugins: [require('daisyui')],
 };
 export default config;

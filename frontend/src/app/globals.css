@@ -10,6 +10,14 @@
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
+.glassy-pro {
+  border-radius: 16px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
 @keyframes shake {
   0% { transform: translateX(0); }
   25% { transform: translateX(-10px); }
@@ -18,10 +26,6 @@
   100% { transform: translateX(0); }
 }
 
-<<<<<<< HEAD
-.shake-element {
-=======
 .shake-animation {
->>>>>>> 1c05eb3600e24680526510b34d3b5e5a39954dfa
   animation: shake 0.5s infinite;
 }
