@@ -1,6 +1,6 @@
-import { APIEmbedField, ChannelType, PermissionsBitField } from "discord.js"
+import { APIEmbedField, ChannelType, PermissionsBitField, basename } from "discord.js"
 import { client } from ".."
-import { guildId, zeroUser } from "./data"
+import { generateUniqueKey, guildId, zeroUser } from "./data"
 import { InfoEmbed } from "./embed"
 import { collections } from "./mongo"
 import { BotUser, Clan, ClanUser, Product } from "./types"
@@ -104,6 +104,76 @@ export async function purchaseProduct(userId: string, product: Product) {
     }
     return
 }
+export async function addUserToClan(userId: string, clanId: string) {
+    let clan = await fetchClan(clanId)
+    let user = await fetchUser(userId)
+    if(clan && user) {
+        clan.Users.push({
+            permissionLevel: 0,
+            user: userId
+        })
+        const guild = await client.guilds.fetch(guildId)
+        const role = guild.roles.cache.find(role => role.name == `${clan?.name} Member`)
+        if(role) {
+            (await guild.members.fetch(userId)).roles.add(role)
+        }
+        user.clanId = clan.clanId
+        collections.clans.updateOne({clanId: clanId}, {$set: clan})
+        collections.users.updateOne({userId: userId}, {$set: user})
+    }
+}
+export async function removeUserFromClan(userId: string, clanId: string) {
+    let clan = await fetchClan(clanId)
+    let user = await fetchUser(userId)
+    if(clan && user) {
+        const index = clan.Users.findIndex(item => item.user === userId)
+        let clanUser = clan.Users[index]
+        if(index !== -1)
+        clan.Users.splice(index, 1)
+        const guild = await client.guilds.fetch(guildId)
+        const role = guild.roles.cache.find(role => role.name == `${clan?.name} Member`)
+        if(role) {
+            (await guild.members.fetch(userId)).roles.remove(role)
+        }
+        if(clanUser.permissionLevel = 1) {
+            const role = guild.roles.cache.find(role => role.name == `${clan?.name} Co-Leader`)
+            if(role) {
+                (await guild.members.fetch(userId)).roles.remove(role)
+            }
+        }
+        user.clanId = ''
+        collections.clans.updateOne({clanId: clanId}, {$set: clan})
+        collections.users.updateOne({userId: userId}, {$set: user})
+    }
+}
+export async function deleteClan(clanId:string) {
+    const clan = await fetchClan(clanId)
+    if(clan) 
+    {
+        const guild = await client.guilds.fetch(guildId)
+        clan.Users.map(async (user) => {
+            let userT = await fetchUser(user.user)
+            userT.clanId = ''
+            collections.users.updateOne({userId: user.user}, {$set: userT})
+        })
+        const role1 = guild.roles.cache.find(role => role.name == `${clan?.name} Member`)
+        const role2 = guild.roles.cache.find(role => role.name == `${clan?.name} Co-Leader`)
+        const role3 = guild.roles.cache.find(role => role.name == `${clan?.name} Leader`)
+        if(role1) role1.delete()
+        if(role2) role2.delete()
+        if(role3) role3.delete()
+        
+        const category = await guild.channels.fetch(clan.clanId)
+        if(category && category.type == ChannelType.GuildCategory)
+        {
+            category.children.cache.forEach(channel => {
+                channel.deletable ? channel.delete() : console.log('Tried to delete channel failure.')
+            })
+            if(category.deletable) category.delete()
+        }
+        collections.clans.deleteOne({clanId: clanId})
+    }
+}
 export async function createClan(userId: string, name: string, description: string) {
     reduceBalance(userId, 'ice', 10)
     const guild = await client.guilds.fetch(guildId)
@@ -177,4 +247,102 @@ export async function existClan(type: 'id' | 'name', value: string): Promise<boo
             break
     }
     return found
+}
+export async function getName(value: string, type: 'clan') {
+    let returnVal = 'None Found'
+    switch(type) {
+        case 'clan':
+            let clan = await collections.clans.findOne({clanId: value})
+            if(clan) return returnVal = clan.name
+            break
+    }
+    return returnVal
+}
+export async function depositClan(amount: number, userId: string) {
+    const user = await fetchUser(userId)
+    if(user) {
+        reduceBalance(userId, "ice", amount)
+        collections.clans.updateOne({
+            clanId: user.clanId
+        },
+        {
+            $inc: {
+                balance: amount,
+            }
+        })
+    }
+    return
+}
+export async function updateClanDetails(clanId: string, desc: string) {
+    console.log(1)
+    let clan = await fetchClan(clanId)
+    if(clan) {
+        clan.description = desc
+        collections.clans.updateOne({
+            clanId: clanId
+        }, {
+            $set: clan
+        })
+    }
+    return
+}
+export function inviteUserToClan(clanId: string, userId: string): string {
+    let key = generateUniqueKey()
+    collections.invites.insertOne({
+        clanId: clanId,
+        userId: userId,
+        invite: key,
+        date: Date.now()
+    })
+    return key
+}
+export async function useKey(key: string, userId: string): Promise<{used: boolean, clanId: string}> {
+    let used = false
+    const invite = await collections.invites.findOne({invite: key})
+    if(invite && invite.userId == userId && (Date.now() - invite.date <= 172000000)) {
+        collections.invites.deleteOne({invite: key})
+        used = true
+    }
+    return {used: used, clanId: invite?.clanId || ''}
+}
+export async function handlePermissionChange(perm: 'member' | 'coleader', userId: string, clanId: string) {
+    let clan = await fetchClan(clanId)
+    if(clan) {
+        const index = clan.Users.findIndex(item => item.user === userId)
+        const guild = await client.guilds.fetch(guildId)
+        // const roleMember = guild.roles.cache.find(role => role.name == `${clan?.name} Member`)
+        const roleCL = guild.roles.cache.find(role => role.name == `${clan?.name} Co-Leader`)
+        const member = await guild.members.fetch(userId)
+        switch(perm) {
+            case 'member':
+                if(clan.Users[index].permissionLevel == 1) {
+                    clan.Users[index].permissionLevel = 0
+                    if(roleCL)
+                    member.roles.remove(roleCL)
+                    collections.clans.updateOne({clanId: clan.clanId}, {$set: clan})
+                }
+                break
+            case 'coleader':
+                if(clan.Users[index].permissionLevel == 0) {
+                    clan.Users[index].permissionLevel = 1
+                    if(roleCL)
+                    member.roles.add(roleCL)
+                    collections.clans.updateOne({clanId: clan.clanId}, {$set: clan})
+                }
+                break
+        }
+    }
+}
+
+export function upgradeClan(amount: number, clanId: string) {
+    collections.clans.updateOne(
+        {
+            clanId: clanId,
+        },
+        {
+            $inc: {
+                maxUser: amount
+            }
+        }
+    )
 }

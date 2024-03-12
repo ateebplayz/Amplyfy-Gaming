@@ -1,6 +1,6 @@
 const config: {serverUrl: string, serverProtocol: 'http' | 'https'} = {
-    serverUrl: 'localhost:8080',
-    serverProtocol: 'http'
+    serverUrl: 'bxd5jcdr-8080.inc1.devtunnels.ms',
+    serverProtocol: 'https'
 }
 
 export default config

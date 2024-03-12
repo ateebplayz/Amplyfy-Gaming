@@ -81,3 +81,10 @@ export interface Clan {
     balance: number,
     Users: Array<ClanUser>
 }
+
+export interface Invite {
+    clanId: string,
+    userId: string,
+    invite: string,
+    date: number,
+}

@@ -12,7 +12,8 @@
   "main": "index.js",
   "devDependencies": {},
   "scripts": {
-    "start": "npx tsc && node out/deploy && node out/index"
+    "start": "npx tsc && node out/deploy && node out/index",
+    "deploy": "npx tsc && node out/deploy"
   },
   "author": "",
   "license": "ISC"

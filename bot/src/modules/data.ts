@@ -4,7 +4,7 @@ export const zeroUser = (userId: string): BotUser => {
     const user: BotUser = {
         userId: userId,
         balance: {
-            snowflakes: 0,
+            snowflakes: 2,
             iceCubes: 0
         },
         clanId: "",
@@ -40,3 +40,13 @@ export const channelIds ={
     logChannel: '1211070510083870790'
 }
 export const guildId = '1186395097386983505'
+
+export function generateUniqueKey(): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let key = ''
+    for (let i = 0; i < 16; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length)
+        key += characters.charAt(randomIndex)
+    }
+    return key
+}
