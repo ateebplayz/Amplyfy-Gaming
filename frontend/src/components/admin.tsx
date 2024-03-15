@@ -11,6 +11,7 @@ function AdminPage() {
   const [users, setUsers] = React.useState<Array<WebUser>>([])
   const [disabled, setDisabled] = React.useState(false)
   const [shake, setShake] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState('')
   const [error, setError] = React.useState('')
   const [perms, setPerms] = React.useState<Array<{ name: string, value: number }>>([])
   const [localUser, setLocalUser] = React.useState<WebUser>({
@@ -137,38 +138,43 @@ function AdminPage() {
       setDisabled(false)
     }
   }
+  const filteredAdmins = users.filter(admin => 
+    admin.username.toLowerCase().includes(searchQuery.toLowerCase())
+  )
   return (
     <div className='flex justify-start items-center w-full min-h-screen flex-col'>
       <h1 className='text-4xl font-bold text-center w-full mb-2 mt-8'>Administrators</h1>
       <p className='text-center text-lg w-full mb-4'>Below are all your administrators that have access to this panel</p>
       <button className='rounded-xl shadow-xl glassy p-4 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm' onClick={() => {setLocalUser({username: '', password: '', permissions: 0b0000000000000000}),(document.getElementById('modal_create_admin') as HTMLDialogElement).showModal()}}>Create New</button>
+      <input className='w-96 lg:w-full glassy p-3 bg-transparent transition duration-500 hover:cursor-pointer hover:scale-110 active:scale-90 focus:outline-none focus:scale-105 focus:cursor-text placeholder-white my-4' placeholder='Search Admin Name' onChange={(e)=>{setSearchQuery(e.target.value)}}/>
       <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll'>
-        {users.map((user, index) => (
-          <div key={index} className='w-full glassy flex justify-between items-center flex-row p-10 mt-8'>
-            <div className='flex justify-center items-center flex-row'>
-              <div className='flex justify-start items-start h-full flex-col mr-8'>
-                <h1 className='font-bold text-2xl mb-2'>Username</h1>
-                <p>{user.username}</p>
+        {filteredAdmins.map((user, index) => (
+          <div key={index} className='w-full glassy flex justify-between items-center flex-row p-10 mt-8 lg:flex-col lg:p-4 lg:pt-8'>
+            <div className='flex justify-center items-center flex-row lg:flex-col'>
+              <div className='flex justify-start items-start h-full flex-col mr-8 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>Username</h1>
+                <p className='lg:text-center lg:w-full'>{user.username}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col ml-8'>
-                <h1 className='font-bold text-2xl mb-2'>Password</h1>
-                <p>
+              <div className='flex justify-start items-start h-full flex-col ml-8 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>Password</h1>
+                <p className='lg:text-center lg:w-full'>
                   {user.password.split('').map((char, index) => (
                     <span key={index}>*</span>
                   ))}
                 </p>
               </div>
             </div>
-            <div className='w-96'>
+            <div className='w-96 lg:w-full'>
               <button className='rounded-xl my-4 shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-full' onClick={async()=>{handleViewPermissionsClick(user)}}>View Permissions</button>
-              <div className='flex justify-center items-center flex-row'>
-                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2' onClick={()=>{setUpdateUser(user); (document.getElementById('modal_update_admin') as HTMLDialogElement).showModal()}}>Edit User</button>
-                <button onClick={()=>{handleDeletion(user)}} className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500'>Delete User</button>
+              <div className='flex justify-center items-center flex-row lg:flex-col'>
+                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2 lg:mx-0 lg:w-full lg:w-full lg:mb-4' onClick={()=>{setUpdateUser(user); (document.getElementById('modal_update_admin') as HTMLDialogElement).showModal()}}>Edit User</button>
+                <button onClick={()=>{handleDeletion(user)}} className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500 lg:mx-0 lg:w-full lg:w-full'>Delete User</button>
               </div>
             </div>
           </div>
         ))}
         {users.length == 0 ? <h1 className='text-3xl font-bold mt-32'>You do not have permission to view these Administrators</h1> : ''}
+        {filteredAdmins.length == 0 && users.length > 0 ? <h1 className='text-3xl font-bold mt-32 lg:text-2xl lg:text-center'>No Clans exist</h1> : ''}
       </div>
       <dialog id="modal_view_admin_perm" className="modal">
         <div className="modal-box p-10 glassy-pro bg-transparent">

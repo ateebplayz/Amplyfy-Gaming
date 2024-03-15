@@ -7,7 +7,7 @@ import { collections } from '../modules/mongo'
 import { addUserToClan, createClan, deleteClan, depositClan, existClan, fetchClan, fetchUser, handlePermissionChange, inviteUserToClan, removeUserFromClan, updateClanDetails, useKey } from '../modules/db'
 import { emojis, guildId } from '../modules/data'
 import { client } from '..'
-import { getClanUpgradeAmount } from '../modules/f'
+import { getClanLevel, getClanUpgradeAmount } from '../modules/f'
 
 export const data = new SlashCommandBuilder()
     .setName('clan')
@@ -22,6 +22,7 @@ export const data = new SlashCommandBuilder()
     .addSubcommand((subcommand)=>subcommand.setDescription('Give a user in your clan a certain role').setName('manage').addStringOption(opt=>opt.setChoices({name: 'member', value: 'member'}, {name: 'coleader', value: 'coleader'}).setRequired(true).setName('type').setDescription('The type of role you wish to assign this member')).addUserOption(opt=>opt.setDescription('The user to edit').setName('user').setRequired(true)))
     .addSubcommand((subcommand)=>subcommand.setDescription('Abandon your clan. THIS ACTION IS IRREVERSIBLE.').setName('abandon'))
     .addSubcommand((subcommand)=>subcommand.setDescription('Upgrade your clan max space').setName('upgrade'))
+    .addSubcommand((subcommand)=>subcommand.setDescription('Kick a user from your clan').setName('kick').addUserOption(opt=>opt.setDescription('The user to kick').setName('user').setRequired(true)))
 export const options: CommandOptions = {
     cooldown: 10000,
     permissionLevel: 'all'
@@ -122,6 +123,10 @@ export async function execute(interaction:CommandInteraction) {
                         inline: true,
                     },
                 )
+                if(getClanLevel(clan.maxUser) == 'Igloo') embed.setImage('https://media.discordapp.net/attachments/1210271642467696661/1217886441737162802/2024-03-10_22-10-30_6970.png?ex=6605a822&is=65f33322&hm=31e061b41f27b752c7753067ec1b779f105a49ad65fcb1c7d05db66085460289&=&format=webp&quality=lossless&width=851&height=662')
+                if(getClanLevel(clan.maxUser) == 'Iceberg') embed.setImage('https://media.discordapp.net/attachments/1210271642467696661/1217886442190016512/2024-03-10_22-18-50_7771.png?ex=6605a823&is=65f33323&hm=822e1aca847ae232f2dbe3e45ccca72bfc8092268e2835e413e319d8d3d8c03b&=&format=webp&quality=lossless&width=851&height=662') 
+                if(getClanLevel(clan.maxUser) == 'Ice Fortress') embed.setImage('https://media.discordapp.net/attachments/1210271642467696661/1217886442655584356/2024-03-10_22-20-42_3869.png?ex=6605a823&is=65f33323&hm=7dcbd6445f10804b502724062d2894c9b47c92d96e5b9315f969e22f3f9ca712&=&format=webp&quality=lossless&width=851&height=662')
+                if(getClanLevel(clan.maxUser) == 'Ice Kingdom') embed.setImage('https://media.discordapp.net/attachments/1210271642467696661/1217886443175940217/2024-03-10_22-22-20_7573.png?ex=6605a823&is=65f33323&hm=fb2e96afa1ec56a6f0ee08d054c7ab12fd072060bc1a01744f848798909a52ee&=&format=webp&quality=lossless&width=851&height=662')
                 interaction.editReply({embeds: [embed]})
                 return
             } else {
@@ -194,13 +199,26 @@ export async function execute(interaction:CommandInteraction) {
         const user = await fetchUser(interaction.user.id)
         if(user.clanId == '') {
             const keyValid = await useKey(key, interaction.user.id)
-            if(keyValid.used) {
-                addUserToClan(interaction.user.id, keyValid.clanId)
-                const embed = new SuccessEmbed(`Clan Joined`, `You have successfully joined the clan. You have access to all their channels. Enjoy.`)
-                return interaction.editReply({embeds: [embed]})
+            const clan = await fetchClan(keyValid.clanId)
+            if(clan) {
+                if(clan.Users.length + 1 < clan.maxUser) {
+                    if(keyValid.used) {
+                        addUserToClan(interaction.user.id, keyValid.clanId)
+                        const embed = new SuccessEmbed(`Clan Joined`, `You have successfully joined the clan. You have access to all their channels. Enjoy.`)
+                        return interaction.editReply({embeds: [embed]})
+                    } else {
+                        const embed = new ErrorEmbed(`Invalid Key`, `This key doesn't exist in our system. This can be due to you not being the original reciever, it being expired, or just it being a fake key.`)
+                        return interaction.editReply({embeds: [embed]})
+                    }
+                } else { 
+                    const embed = new ErrorEmbed(`Clan Full`, "This clan is already full. Ask the leader to either remove members or upgrade the clan.")
+                    interaction.editReply({embeds: [embed]})
+                    return
+                }
             } else {
-                const embed = new ErrorEmbed(`Invalid Key`, `This key doesn't exist in our system. This can be due to you not being the original reciever, it being expired, or just it being a fake key.`)
-                return interaction.editReply({embeds: [embed]})
+                const embed = new ErrorEmbed(`Clan doesn't exist`, "This clan doesn't exist anymore. This was either due to it being deleted.")
+                interaction.editReply({embeds: [embed]})
+                return
             }
         } else {
             const embed = new ErrorEmbed(`Already in Clan`, "You're already part of a clan. Please leave that clan before joining another one. You may use the `/clan leave` command.")
@@ -223,6 +241,10 @@ export async function execute(interaction:CommandInteraction) {
                 } else {
                     removeUserFromClan(interaction.user.id, user.clanId)
                 }
+            } else {
+                const embed = new ErrorEmbed(`Not in a Clan`, "You can't leave a clan you aren't a part of!")
+                interaction.editReply({embeds: [embed]})
+                return
             }
             const embed = new SuccessEmbed(`Clan Left`, `You have successfully left the clan. You no longer have access to all their channels.`)
             return interaction.editReply({embeds: [embed]})
@@ -327,6 +349,43 @@ export async function execute(interaction:CommandInteraction) {
             const embed = new ErrorEmbed(`No clan found`, `You have not joined any clan! Please join one in order to deposit ice cubes to the clan.`)
             interaction.editReply({embeds: [embed]})
             return
+        }
+    } else if (sub == 'kick') {
+        await interaction.deferReply({ephemeral: true})
+        const userD = (interaction as ChatInputCommandInteraction).options.getUser('user', true)
+        const userToKick = await fetchUser(userD.id)
+        const user = await fetchUser(interaction.user.id)
+        if(userToKick.clanId == '') {
+            const embed = new ErrorEmbed(`Not in a Clan`, "You can't leave a clan you aren't a part of!")
+            interaction.editReply({embeds: [embed]})
+            return
+        } else {
+            const clan = await fetchClan(user.clanId)
+            if(clan) {
+                if(clan.leaderId == user.userId) {
+                    let found = false
+                    clan.Users.map((user) => {
+                        if(user.user == userD.id) found = true
+                    })
+                    if(found) {
+                        removeUserFromClan(userToKick.userId, user.clanId)
+                        const embed = new SuccessEmbed(`User Kicked`, `You have successfully kicked ${userD.tag} from your clan.`)
+                        return interaction.editReply({embeds: [embed]})
+                    } else {
+                        const embed = new ErrorEmbed(`User not found`, `This user isnt a part of your clan. You cannot kick him!`)
+                        interaction.editReply({embeds: [embed]})
+                        return
+                    }
+                } else {
+                    const embed = new ErrorEmbed(`Not Owner`, `Only the owner of this clan can edit the clan details.`)
+                    interaction.editReply({embeds: [embed]})
+                    return
+                }
+            } else {
+                const embed = new ErrorEmbed(`Not in a Clan`, "You can't kick a user from a clan you aren't a part of!")
+                interaction.editReply({embeds: [embed]})
+                return
+            }
         }
     }
     return

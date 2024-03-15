@@ -20,6 +20,14 @@ const config: Config = {
         fourthTrans: 'rgba(245, 114, 92, 0.75)',
         fifthTrans: 'rgba(223, 162, 94, 0.75)',
         secondary: '#111111',
+      },
+      screens: {
+        '2xl': {'max': '1535px'},
+        'xl': {'min': '1279px'},
+        'lg': {'max': '1023px'},
+        'lgo': {'min': '1023px'},
+        'md': {'max': '767px'},
+        'sm': {'max': '639px'},
       }
     },
   },

@@ -4,6 +4,7 @@ import webUserRoute from './routes/webUser'
 import permissionRoute from './routes/permission'
 import usersRoute from './routes/user'
 import statsRoute from './routes/stats'
+import clansRoute from './routes/clans'
 import { mongoClient } from './modules/mongo'
 import productsRoute from './routes/product'
 
@@ -16,6 +17,7 @@ app.use('/api/permissions', permissionRoute)
 app.use('/api/users', usersRoute)
 app.use('/api/stats', statsRoute)
 app.use('/api/products', productsRoute)
+app.use('/api/clans', clansRoute)
 app.listen(8080, () => {
     console.log('App Listening on Port 8080')
 })

@@ -5,6 +5,7 @@ import { InfoEmbed } from "./embed"
 import { collections } from "./mongo"
 import { BotUser, Clan, ClanUser, Product } from "./types"
 import dotenv from 'dotenv'
+import { getClanUpgradeAmount } from "./f"
 dotenv.config()
 
 export async function fetchUser(userId:string): Promise<BotUser> {
@@ -195,18 +196,18 @@ export async function createClan(userId: string, name: string, description: stri
         ]
     })
     await guild.channels.create({
-        name: 'Talking',
+        name: 'Chatting',
+        type: ChannelType.GuildText,
+        parent: category.id
+    })
+    await guild.channels.create({
+        name: 'Talking #1',
         type: ChannelType.GuildVoice,
         parent: category.id
     })
     await guild.channels.create({
         name: 'Talking #2',
         type: ChannelType.GuildVoice,
-        parent: category.id
-    })
-    await guild.channels.create({
-        name: 'Chatting',
-        type: ChannelType.GuildText,
         parent: category.id
     })
     let user = await fetchUser(userId)
@@ -334,10 +335,11 @@ export async function handlePermissionChange(perm: 'member' | 'coleader', userId
     }
 }
 
-export function upgradeClan(amount: number, clanId: string) {
+export async function upgradeClan(amount: number, clan: Clan): Promise<boolean> {
+    let newLevelAchieved = false
     collections.clans.updateOne(
         {
-            clanId: clanId,
+            clanId: clan.clanId,
         },
         {
             $inc: {
@@ -345,4 +347,134 @@ export function upgradeClan(amount: number, clanId: string) {
             }
         }
     )
+    collections.clans.updateOne({
+        clanId: clan.clanId,
+    }, {
+        $inc: {
+            balance: getClanUpgradeAmount(clan.maxUser) * -1
+        }
+    })
+    const newClanMaxUser = amount + clan.maxUser
+    const guild = await client.guilds.fetch(guildId)
+    const category = await guild.channels.fetch(clan.clanId)
+    if(category && category.type == ChannelType.GuildCategory)
+    {
+        if(newClanMaxUser == 25) { // Assuming amount's are credited in only Fives.
+            await guild.channels.create({
+                name: 'Talking #3',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #4',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #5',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Chat Thread',
+                type: ChannelType.GuildForum,
+                parent: category.id
+            })
+            const leaderRole = guild.roles.cache.find(role => role.name == `${clan.name} Co-Leader`)
+            const coLeaderRole = guild.roles.cache.find(role => role.name == `${clan.name} Leader`)
+            if(leaderRole && coLeaderRole) {
+                await guild.channels.create({
+                    name: 'Leadership Channel',
+                    type: ChannelType.GuildText,
+                    parent: category.id,
+                    permissionOverwrites: [
+                        {
+                            id: guild.roles.everyone,
+                            deny: [PermissionsBitField.Flags.ViewChannel]
+                        },
+                        {
+                            id: leaderRole.id,
+                            allow: [PermissionsBitField.Flags.ViewChannel]
+                        },
+                        {
+                            id: coLeaderRole.id,
+                            allow: [PermissionsBitField.Flags.ViewChannel]
+                        }
+                    ]
+                })
+            }
+            newLevelAchieved = true
+        } 
+        if(newClanMaxUser == 50) {
+            await guild.channels.create({
+                name: 'Talking #6',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #7',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #8',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #9',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #10',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            newLevelAchieved = true
+        }
+        if(newClanMaxUser == 100) {
+            await guild.channels.create({
+                name: 'Talking #11',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #12',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #13',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #14',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            await guild.channels.create({
+                name: 'Talking #15',
+                type: ChannelType.GuildVoice,
+                parent: category.id
+            })
+            newLevelAchieved = true
+        }
+    }
+    return newLevelAchieved
+}
+export async function getTopClans(): Promise<Clan[]> {
+    try {
+        const topClans: Clan[] = await collections.clans
+            .find({})
+            .sort({ "balance": -1 })
+            .limit(10)
+            .toArray()
+
+        return topClans
+    } catch (error) {
+        console.log('Error retrieving top clans:', error)
+        return []
+    }
 }

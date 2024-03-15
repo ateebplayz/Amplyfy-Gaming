@@ -22,6 +22,7 @@ function ShopPage() {
   const [localDescription, setLocalDescription] = React.useState('')
   const [disabled, setDisabled] = React.useState(false)
   const [error, setError] = React.useState('')
+  const [searchQuery, setSearchQuery] = React.useState('')
   const [error2, setError2] = React.useState('')
   const [createProduct, setCreateProduct] = React.useState<Product>({
     id: '',
@@ -133,46 +134,51 @@ function ShopPage() {
       setError2(resp.data.error)
     }
   }
+  const filteredProducts = products.filter(product =>
+    product.id.toLowerCase().startsWith(searchQuery.toLowerCase()) || product.name.toLowerCase().includes(searchQuery.toLowerCase())
+  )
   return (
     <div className='flex justify-start items-center w-full min-h-screen flex-col'>
       <h1 className='text-4xl font-bold text-center w-full mb-2 mt-8'>Products</h1>
       <p className='text-center text-lg w-full mb-4'>Below are all your Products that are available for purchase.</p>
       <button className='rounded-xl shadow-xl glassy p-4 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm' onClick={() => {setCreateProduct({id: '',name: '',description: '',price: 0,stock: 0,values: []});(document.getElementById('modal_create_product') as HTMLDialogElement).showModal()}}>Create New</button>
+      <input className='w-96 lg:w-full glassy p-3 bg-transparent transition duration-500 hover:cursor-pointer hover:scale-110 active:scale-90 focus:outline-none focus:scale-105 focus:cursor-text placeholder-white my-4' placeholder='Search Product ID or Product Name' onChange={(e)=>{setSearchQuery(e.target.value)}}/>
       <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll'>
-        {products.map((product, index) => (
-          <div key={index} className='w-full glassy flex justify-between items-center flex-row p-10 mt-8'>
-            <div className='flex justify-center items-center flex-row'>
-              <div className='flex justify-start items-start h-full flex-col mr-2'>
-                <h1 className='font-bold text-lg mb-2'>Product ID</h1>
-                <p>{product.id}</p>
+        {filteredProducts.map((product, index) => (
+          <div key={index} className='w-full glassy flex justify-between items-center flex-row p-10 mt-8 lg:flex-col lg:p-4 lg:pt-8'>
+            <div className='flex justify-center items-center flex-row lg:flex-col'>
+              <div className='flex justify-start items-start h-full flex-col mr-2 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-lg mb-2 lg:w-full lg:text-center'>Product ID</h1>
+                <p className='lg:w-full lg:text-center'>{product.id}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col mx-2'>
-                <h1 className='font-bold text-lg mb-2'>Product Name</h1>
-                <p>{product.name}</p>
+              <div className='flex justify-start items-start h-full flex-col mx-2 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-lg mb-2 lg:w-full lg:text-center'>Product Name</h1>
+                <p className='lg:w-full lg:text-center'>{product.name}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col mx-2'>
-                <h1 className='font-bold text-lg mb-2'>Product Description</h1>
-                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer' onClick={()=>{setLocalDescription(product.description); (document.getElementById('modal_description_product') as HTMLDialogElement).showModal()}}>Click To Show</p>
+              <div className='flex justify-start items-start h-full flex-col mx-2 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-lg mb-2 lg:w-full lg:text-center'>Product Description</h1>
+                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer lg:w-full lg:text-center' onClick={()=>{setLocalDescription(product.description); (document.getElementById('modal_description_product') as HTMLDialogElement).showModal()}}>Click To Show</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col mx-2'>
-                <h1 className='font-bold text-lg mb-2'>Product Price</h1>
-                <p>{product.price}</p>
+              <div className='flex justify-start items-start h-full flex-col mx-2 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-lg mb-2 lg:w-full lg:text-center'>Product Price</h1>
+                <p className='lg:w-full lg:text-center'>{product.price}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col ml-2'>
-                <h1 className='font-bold text-lg mb-2'>Product Stock</h1>
-                <p>{product.stock}</p>
+              <div className='flex justify-start items-start h-full flex-col ml-2 lg:mx-2 lg:mb-4'>
+                <h1 className='font-bold text-lg mb-2 lg:w-full lg:text-center'>Product Stock</h1>
+                <p className='lg:w-full lg:text-center'>{product.stock}</p>
               </div>
             </div>
-            <div className='w-96'>
+            <div className='w-96 lg:w-full'>
               <button className='rounded-xl my-4 shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-full' onClick={()=>{handleViewKeys(product)}}>View Product Keys</button>
-              <div className='flex justify-center items-center flex-row'>
-                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2' onClick={() => { setUpdateProduct(product); (document.getElementById('modal_update_product') as HTMLDialogElement).showModal() }}>Edit Product</button>
-                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500' onClick={()=>{handleDeletion(product)}}>Delete Product</button>
+              <div className='flex justify-center items-center flex-row lg:flex-col'>
+                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2 lg:mx-0 lg:mb-4 lg:w-full' onClick={() => { setUpdateProduct(product); (document.getElementById('modal_update_product') as HTMLDialogElement).showModal() }}>Edit Product</button>
+                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500 lg:mx-0 lg:mb-4 lg:w-full' onClick={()=>{handleDeletion(product)}}>Delete Product</button>
               </div>
             </div>
           </div>
         ))}
-        {products.length == 0 ? <h1 className='text-3xl font-bold mt-32'>You do not have permission to view these Products</h1> : ''}
+        {products.length == 0 ? <h1 className='text-3xl font-bold mt-32 lg:text-center lg:text-2xl'>You do not have permission to view these Products</h1> : ''}
+        {filteredProducts.length == 0 && products.length > 0 ? <h1 className='text-3xl font-bold mt-32 lg:text-2xl lg:text-center'>No Products exist</h1> : ''}
       </div>
       <dialog id="modal_create_product" className="modal">
         <div className={`modal-box p-10 glassy-pro bg-transparent ${shake ? 'shake-animation' : ''}`}>

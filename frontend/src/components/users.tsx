@@ -1,13 +1,16 @@
 import config from '@/config'
+import Purchase from '@/schemas/purchase'
 import BotUser, { Balance } from '@/schemas/user'
 import axios from 'axios'
-import React from 'react'
+import React, { use } from 'react'
 
 function UsersPage() {
   const [users, setUsers] = React.useState<Array<BotUser>>([])
+  const [localItems, setLocalItems] = React.useState<Array<Purchase>>([])
   const [localBalance, setLocalBalance] = React.useState<Balance>({snowflakes: 0, iceCubes: 0})
   const [error, setError] = React.useState('')
   const [disabled, setDisabled] = React.useState(false)
+  const [searchQuery, setSearchQuery] = React.useState('')
   const [shake, setShake] = React.useState(false)
   const [updateUser, setUpdateUser] = React.useState<BotUser>({
     userId: '',
@@ -88,42 +91,50 @@ function UsersPage() {
         break
     }
   }
-
+  const handleItemOpen = (items: Array<Purchase>) => {
+    setLocalItems(items);
+    (document.getElementById('modal_items_show') as HTMLDialogElement).showModal()
+  }
+  const filteredUsers = users.filter(user => 
+    user.userId.toLowerCase().startsWith(searchQuery.toLowerCase())  
+  )
   return (
     <div className='flex justify-start items-center w-full min-h-screen flex-col'>
       <h1 className='text-4xl font-bold text-center w-full mb-2 mt-8'>Users</h1>
       <p className='text-center text-lg w-full mb-4'>Below are all your users that have used any command on the bot</p>
+      <input className='w-96 lg:w-full glassy p-3 bg-transparent transition duration-500 hover:cursor-pointer hover:scale-110 active:scale-90 focus:outline-none focus:scale-105 focus:cursor-text placeholder-white' placeholder='Search User ID' onChange={(e)=>{setSearchQuery(e.target.value)}}/>
       <div className='flex flex-col justify-center items-center w-full h-full overflow-y-scroll'>
-        {users.map((user, index) => (
-          <div key={index} className='w-full glassy flex justify-between items-center flex-row p-10 mt-8'>
-            <div className='flex justify-center items-center flex-row'>
-              <div className='flex justify-start items-start h-full flex-col mr-4'>
-                <h1 className='font-bold text-2xl mb-2'>User ID</h1>
-                <p>{user.userId}</p>
+        {filteredUsers.map((user, index) => (
+          <div key={index} className='w-full glassy flex justify-between items-center flex-row lg:flex-col p-10 lg:p-4 lg:pt-8 mt-8'>
+            <div className='flex justify-center items-center flex-row lg:flex-col'>
+              <div className='flex justify-start items-start h-full flex-col mr-4 lg:mx-2'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>User ID</h1>
+                <p className='lg:text-center lg:w-full'>{user.userId}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col mx-4'>
-                <h1 className='font-bold text-2xl mb-2'>Clan ID</h1>
-                <p>{user.clanId == '' ? 'None Joined' : user.clanId}</p>
+              <div className='flex justify-start items-start h-full flex-col mx-4 lg:mx-2'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>Clan ID</h1>
+                <p className='lg:text-center lg:w-full'>{user.clanId == '' ? 'None Joined' : user.clanId}</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col mx-8'>
-                <h1 className='font-bold text-2xl mb-2'>Balance</h1>
-                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer' onClick={()=>{handleOpenBalance(user)}}>Click To Show</p>
+              <div className='flex justify-start items-start h-full flex-col mx-8 lg:mx-2'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>Balance</h1>
+                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer lg:text-center lg:w-full' onClick={()=>{handleOpenBalance(user)}}>Click To Show</p>
               </div>
-              <div className='flex justify-start items-start h-full flex-col ml-8'>
-                <h1 className='font-bold text-2xl mb-2'>Items</h1>
-                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer' onClick={()=>{handleOpenBalance(user)}}>Click To Show</p>
+              <div className='flex justify-start items-start h-full flex-col ml-8 lg:mx-2'>
+                <h1 className='font-bold text-2xl mb-2 lg:text-center lg:w-full'>Items</h1>
+                <p className='underline transition duration-500 hover:opacity-50 cursor-pointer lg:text-center lg:w-full' onClick={()=>{handleItemOpen(user.items)}}>Click To Show</p>
               </div>
             </div>
-            <div className='w-96'>
-              <button className='rounded-xl my-4 shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-full' onClick={()=>{}}>View Clan Information</button>
-              <div className='flex justify-center items-center flex-row'>
-                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2' onClick={() => { setUpdateUser(user); (document.getElementById('modal_update_user') as HTMLDialogElement).showModal() }}>Edit User</button>
-                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500' onClick={()=>{handleDeletion(user)}}>Delete User</button>
+            <div className='w-96 lg:w-full'>
+              <button className='rounded-xl my-4 shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-full' onClick={()=>{window.open(`https://discordapp.com/users/${user.userId}`)}}>Check User on Discord</button>
+              <div className='flex justify-center items-center flex-row lg:flex-col'>
+                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 mr-2 lg:w-full lg:m-0' onClick={() => { setUpdateUser(user); (document.getElementById('modal_update_user') as HTMLDialogElement).showModal() }}>Edit User</button>
+                <button className='rounded-xl shadow-xl glassy p-3 transition duration-500 hover:translate-y-[5px] hover:scale-105 active:scale-90 active:translate-y-[-5px] text-sm w-1/2 ml-2 bg-red-500 lg:w-full lg:m-0 lg:mt-4' onClick={()=>{handleDeletion(user)}}>Delete User</button>
               </div>
             </div>
           </div>
         ))}
-        {users.length == 0 ? <h1 className='text-3xl font-bold mt-32'>You do not have permission to view these Users</h1> : ''}
+        {users.length == 0 ? <h1 className='text-3xl font-bold mt-32 lg:text-2xl lg:text-center'>You do not have permission to view these Users</h1> : ''}
+        {filteredUsers.length == 0 && users.length > 0 ? <h1 className='text-3xl font-bold mt-32 lg:text-2xl lg:text-center'>No Users exist</h1> : ''}
       </div>
       <dialog id="modal_view_balance" className="modal">
         <div className="modal-box p-10 glassy-pro bg-transparent">
@@ -165,6 +176,21 @@ function UsersPage() {
           <h3 className="font-bold text-lg text-center w-full">No Permission</h3>
           <p className="py-4 text-center w-full">You aren&lsquo;t authorized to delete any User Accounts!</p>
           <button onClick={() => { (document.getElementById('modal_delete_user_perm_invalid') as HTMLDialogElement).close() }} className='transition duration-500 bg-first border-2 border-first p-3 w-full mt-4 rounded-xl hover:bg-second active:scale-90 hover:border-second'>Return</button>
+        </div>
+      </dialog>
+      <dialog id="modal_items_show" className="modal">
+        <div className="modal-box p-10 glassy-pro bg-transparent">
+          <h3 className="font-bold text-lg text-center w-full">User Purchase</h3>
+          <p className="py-4 text-center w-full">Below are these Users Purchases.</p>
+          <div className='flex justify-center items-center w-full flex-col'>
+            {localItems.map((item, index) => (
+              <div key={index} className='bg-third w-full rounded-lg p-2 mt-2 flex justify-between items-center flex-row'>
+                <p>{item.product.name}</p>
+                <p>{new Date(item.time).toLocaleDateString('en-us')}</p>
+              </div>
+            ))}
+          </div>
+          <button onClick={() => { (document.getElementById('modal_items_show') as HTMLDialogElement).close() }} className='transition duration-500 bg-first border-2 border-first p-3 w-full mt-4 rounded-xl hover:bg-second active:scale-90 hover:border-second'>Return</button>
         </div>
       </dialog>
     </div>
