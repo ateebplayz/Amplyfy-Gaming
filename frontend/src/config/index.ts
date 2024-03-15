@@ -1,6 +1,6 @@
 const config: {serverUrl: string, serverProtocol: 'http' | 'https'} = {
-    serverUrl: 'localhost:8080',
-    serverProtocol: 'http'
+    serverUrl: 'amplyfy.grabyourservices.com:8080',
+    serverProtocol: 'https'
 }
 
 export default config
