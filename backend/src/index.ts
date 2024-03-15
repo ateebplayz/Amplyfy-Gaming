@@ -18,6 +18,6 @@ app.use('/api/users', usersRoute)
 app.use('/api/stats', statsRoute)
 app.use('/api/products', productsRoute)
 app.use('/api/clans', clansRoute)
-app.listen(8080, () => {
-    console.log('App Listening on Port 8080')
+app.listen(4000, () => {
+    console.log('App Listening on Port 4000')
 })
