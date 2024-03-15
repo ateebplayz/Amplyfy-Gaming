@@ -87,7 +87,7 @@ client.on('interactionCreate', async (interaction) => {
             console.log(`${chalk.red('EXECUTE ERROR >>')} Command ${command.data.name} ${Date.now() - timer}ms ${errorId}`)
             console.error(e)
 
-            await interaction.editReply({embeds: [new RunTimeErrorEmbed(errorId)] }).catch(console.log)
+            await interaction.reply({embeds: [new RunTimeErrorEmbed(errorId)] }).catch(console.log)
         }
     } else if(interaction.isRepliable()) {
         const timer = Date.now()

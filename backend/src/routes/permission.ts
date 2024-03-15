@@ -92,24 +92,8 @@ router.get('/name', (req, res) =>{
 router.get('/fetch', async (req, res) => {
     const permissionsT = [
         {
-            name: 'Create Clans',
-            value: permissions.clans.create
-        },
-        {
-            name: 'Delete Clans',
-            value: permissions.clans.delete
-        },
-        {
-            name: 'Edit Clans',
-            value: permissions.clans.edit
-        },
-        {
             name: 'View Clans',
             value: permissions.clans.view
-        },
-        {
-            name: 'Create Users',
-            value: permissions.users.create
         },
         {
             name: 'Delete Users',

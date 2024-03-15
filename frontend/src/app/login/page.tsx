@@ -38,12 +38,12 @@ function LoginPage() {
     }
   return (
     <div className='flex justify-center items-center bg-gradient-to-r from-first via-second via-third via-fourth to-fifth min-h-screen'>
-        <div className={`rounded-xl flex justify-center items-center flex-col glassy p-8 text-center text-white ${shake ? 'shake-animation' : ''}`}>
+        <div className={`rounded-xl flex justify-center items-center flex-col glassy p-8 text-center text-white lg:mx-4 ${shake ? 'shake-animation' : ''}`}>
             <h1 className='font-sans font-bold text-4xl'>Login</h1>
             <p className='font-sans text-lg mt-4'>Welcome Back! Access the Admin Dashboard</p>
             <div className='flex justify-center items-center w-full flex-col mt-8'>
-                <input onChange={(e) => {handleInput(e, 'username')}} className='glassy p-3 w-full rounded-xl border-white border-2 transition duration-500 hover:scale-105 active:scale-100 text-white focus:cursor-text hover:cursor-pointer focus:outline-none text-black bg-transparent' placeholder='Username'/>
-                <input type='password' onChange={(e) => {handleInput(e, 'password')}} className='glassy p-3 w-full mt-4 rounded-xl border-white border-2 transition duration-500 text-white hover:scale-105 active:scale-100 focus:cursor-text hover:cursor-pointer focus:outline-none text-black bg-transparent' placeholder='Password'/>
+                <input onChange={(e) => {handleInput(e, 'username')}} className='glassy p-3 w-full rounded-xl border-white border-2 transition duration-500 hover:scale-105 active:scale-100 text-white focus:cursor-text hover:cursor-pointer focus:outline-none text-black bg-transparent placeholder-white' placeholder='Username'/>
+                <input type='password' onChange={(e) => {handleInput(e, 'password')}} className='glassy p-3 w-full mt-4 rounded-xl border-white border-2 transition duration-500 text-white hover:scale-105 active:scale-100 focus:cursor-text hover:cursor-pointer focus:outline-none text-black bg-transparent placeholder-white' placeholder='Password'/>
                 <button onClick={handleLogin} className='transition duration-500 bg-first p-3 w-full mt-4 rounded-xl hover:bg-second active:scale-90'>Submit</button>
             </div>
         </div>
